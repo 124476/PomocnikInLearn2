@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Список учебных тем{% endblock %}
+
+{% block content %}
+  <div class="themes-container">
+    <div class="themes-header">
+      <h1 class="themes-title">
+        <i class="fas fa-folder-open"></i> Учебные темы
+      </h1>
+      <p class="themes-subtitle">Выберите тему для просмотра материалов</p>
+    </div>
+
+    <div class="themes-list">
+      {% if themes %}
+        <div class="theme-cards">
+          {% for theme in themes %}
+            <a href="{% url 'learn:info' theme.id %}" class="theme-card">
+              <div class="theme-icon">
+                <i class="fas fa-folder"></i>
+              </div>
+              <div class="theme-info">
+                <h3 class="theme-name">{{ theme.name }}</h3>
+                <div class="theme-arrow">
+                  <i class="fas fa-chevron-right"></i>
+                </div>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <i class="far fa-folder-open empty-icon"></i>
+          <p class="empty-message">Нет доступных тем</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <style>
+    .themes-container {
+      min-width: 800px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    .themes-header {
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .themes-title {
+      font-size: 32px;
+      color: #2c3e50;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .themes-subtitle {
+      color: #7f8c8d;
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .theme-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .theme-card {
+      display: flex;
+      align-items: center;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      text-decoration: none;
+      color: #333;
+      transition: all 0.3s ease;
+      border-left: 4px solid #3498db;
+    }
+
+    .theme-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+    }
+
+    .theme-icon {
+      font-size: 24px;
+      color: #3498db;
+      margin-right: 15px;
+      width: 40px;
+      height: 40px;
+      background: rgba(52, 152, 219, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .theme-info {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .theme-name {
+      margin: 0;
+      font-size: 18px;
+      color: #2c3e50;
+      font-weight: 500;
+    }
+
+    .theme-arrow {
+      color: #bdc3c7;
+      transition: all 0.2s;
+    }
+
+    .theme-card:hover .theme-arrow {
+      color: #3498db;
+      transform: translateX(3px);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 50px 20px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      border: 2px dashed #e0e0e0;
+      margin-top: 30px;
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      color: #bdc3c7;
+      margin-bottom: 20px;
+    }
+
+    .empty-message {
+      font-size: 18px;
+      color: #7f8c8d;
+      margin-bottom: 20px;
+    }
+
+    .empty-action {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #3498db;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+
+    .empty-action:hover {
+      background: #2980b9;
+    }
+
+    @media (max-width: 600px) {
+      .themes-container {
+        padding: 20px 15px;
+      }
+
+      .themes-title {
+        font-size: 26px;
+      }
+
+      .theme-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+{% endblock %}

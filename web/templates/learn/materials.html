@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Материалы по теме {{ theme.name }}{% endblock %}
+
+{% block content %}
+  <div class="materials-page">
+    <div class="materials-container">
+      <div class="materials-header">
+        <div class="breadcrumbs">
+          <a href="{% url 'learn:objects' %}" class="breadcrumb-link">
+            <i class="fas fa-arrow-left"></i> Все темы
+          </a>
+          <span class="breadcrumb-separator">/</span>
+          <span class="breadcrumb-current">{{ theme.name }}</span>
+        </div>
+        <h1 class="materials-title">Материалы по теме: {{ theme.name }}</h1>
+      </div>
+
+      <div class="materials-content">
+        {% if materials %}
+          <div class="materials-grid">
+            {% for material in materials %}
+              <div class="material-item">
+                <a href="{% url 'learn:material' material.id %}" class="material-link">
+                  <div class="material-info">
+                    <h3 class="material-title">{{ material.name }}</h3>
+                  </div>
+                  <div class="material-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                  </div>
+                </a>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-icon">
+              <i class="far fa-folder-open"></i>
+            </div>
+            <h3 class="empty-title">Нет материалов</h3>
+            <p class="empty-text">В этой теме пока нет доступных материалов</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="actions-footer">
+        <a href="{% url 'learn:info' theme.id %}" class="back-button">
+          <i class="fas fa-arrow-left"></i> Назад к темам
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Base styles */
+    .materials-page {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .materials-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 30px 20px 80px;
+    }
+
+    /* Header styles */
+    .materials-header {
+      margin-bottom: 30px;
+    }
+
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+
+    .breadcrumb-link {
+      color: #3498db;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.2s;
+    }
+
+    .breadcrumb-link:hover {
+      color: #2980b9;
+      text-decoration: underline;
+    }
+
+    .breadcrumb-separator {
+      margin: 0 10px;
+      color: #95a5a6;
+    }
+
+    .breadcrumb-current {
+      color: #2c3e50;
+      font-weight: 500;
+    }
+
+    .materials-title {
+      font-size: 28px;
+      color: #2c3e50;
+      margin: 0;
+      font-weight: 600;
+    }
+
+    /* Materials grid */
+    .materials-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+
+    .material-item {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .material-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .material-link {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .material-info {
+      flex: 1;
+    }
+
+    .material-title {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+      color: #2c3e50;
+      font-weight: 500;
+    }
+
+    .material-description {
+      margin: 0;
+      font-size: 14px;
+      color: #7f8c8d;
+      line-height: 1.5;
+    }
+
+    .material-arrow {
+      color: #bdc3c7;
+      font-size: 14px;
+      margin-left: 20px;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .material-item:hover .material-arrow {
+      color: #3498db;
+      transform: translateX(3px);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 50px 20px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      border: 2px dashed #e0e0e0;
+      margin-top: 20px;
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      color: #bdc3c7;
+      margin-bottom: 20px;
+    }
+
+    .empty-title {
+      font-size: 20px;
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+
+    .empty-text {
+      color: #7f8c8d;
+      margin: 0;
+    }
+
+    /* Footer actions */
+    .actions-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      padding: 15px 0;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 25px;
+      background-color: #3498db;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 500;
+      transition: background-color 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .back-button:hover {
+      background-color: #2980b9;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .materials-container {
+        padding: 20px 15px 70px;
+      }
+
+      .materials-title {
+        font-size: 24px;
+      }
+
+      .material-link {
+        padding: 15px;
+      }
+
+      .back-button {
+        padding: 10px 20px;
+        font-size: 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .materials-container {
+        padding: 15px 10px 60px;
+      }
+
+      .breadcrumbs {
+        font-size: 13px;
+      }
+
+      .materials-title {
+        font-size: 22px;
+      }
+
+      .material-title {
+        font-size: 16px;
+      }
+
+      .material-description {
+        font-size: 13px;
+      }
+
+      .empty-state {
+        padding: 30px 15px;
+      }
+
+      .empty-icon {
+        font-size: 40px;
+      }
+
+      .back-button {
+        padding: 8px 16px;
+        font-size: 14px;
+      }
+    }
+  </style>
+{% endblock %}

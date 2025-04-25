@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="game-container" id="game-container">
+  <div class="game-header">
+    <h1>{{ page_title }}</h1>
+    <div class="progress">
+      <div class="progress-bar" id="progress-bar"></div>
+      <span id="progress-text">0/0</span>
+    </div>
+  </div>
+
+  <div class="game-content" id="game-content">
+    <!-- Здесь будет меняться контент игры -->
+  </div>
+
+  <div class="game-controls" id="game-controls">
+    <!-- Здесь будут кнопки управления игрой -->
+  </div>
+</div>
+
+<style>
+  .game-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .game-header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .progress {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+  }
+
+  .progress-bar {
+    flex-grow: 1;
+    height: 10px;
+    background: #ecf0f1;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .progress-bar-inner {
+    height: 100%;
+    width: 0%;
+    background: #3498db;
+    transition: width 0.3s ease;
+  }
+
+  #progress-text {
+    color: #7f8c8d;
+    font-size: 14px;
+    min-width: 50px;
+  }
+
+  .game-content {
+    background: #fff;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .theme-display {
+    font-size: 24px;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  .material-question {
+    font-size: 20px;
+    color: #2c3e50;
+    margin-bottom: 15px;
+  }
+
+  .material-answer {
+    font-size: 16px;
+    color: #34495e;
+    line-height: 1.6;
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+    display: none;
+  }
+
+  .game-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+
+  .game-btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .primary-btn {
+    background: #3498db;
+    color: white;
+  }
+
+  .primary-btn:hover {
+    background: #2980b9;
+  }
+
+  .secondary-btn {
+    background: #f8f9fa;
+    color: #495057;
+    border: 1px solid #dee2e6;
+  }
+
+  .secondary-btn:hover {
+    background: #e9ecef;
+  }
+
+  .success-btn {
+    background: #2ecc71;
+    color: white;
+  }
+
+  .success-btn:hover {
+    background: #27ae60;
+  }
+
+  .result-screen {
+    text-align: center;
+  }
+
+  .result-icon {
+    font-size: 50px;
+    color: #2ecc71;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 768px) {
+    .game-container {
+      padding: 15px;
+    }
+
+    .game-content {
+      padding: 20px;
+    }
+
+    .game-btn {
+      padding: 10px 20px;
+      font-size: 15px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const gameData = {
+      themes: [
+        {% for theme in themes %}
+        {
+          id: {{ theme.id }},
+          name: "",
+          materials: [
+            {% for material in theme.shuffled_materials %}
+            {
+              id: {{ material.id }},
+              name: "{{ material.name|escapejs }}",
+              description: "{{ material.description|escapejs }}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+          ]
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ],
+      currentThemeIndex: 0,
+      currentMaterialIndex: 0,
+      isAnswerShown: false
+    };
+
+    const gameContent = document.getElementById('game-content');
+    const gameControls = document.getElementById('game-controls');
+    const progressBar = document.querySelector('.progress-bar-inner');
+    const progressText = document.getElementById('progress-text');
+
+    startGame();
+
+    function startGame() {
+      gameData.themes.forEach(theme => {
+        shuffleArray(theme.materials);
+      });
+
+      {% if is_single_theme %}
+        gameData.themes = [gameData.themes[0]];
+      {% endif %}
+
+      updateProgress();
+      showNextMaterial();
+    }
+
+    function showNextMaterial() {
+      if (gameData.currentThemeIndex >= gameData.themes.length) {
+        showResults();
+        return;
+      }
+
+      const currentTheme = gameData.themes[gameData.currentThemeIndex];
+
+      if (gameData.currentMaterialIndex >= currentTheme.materials.length) {
+        gameData.currentThemeIndex++;
+        gameData.currentMaterialIndex = 0;
+        showNextMaterial();
+        return;
+      }
+
+      const currentMaterial = currentTheme.materials[gameData.currentMaterialIndex];
+
+      if (!gameData.isAnswerShown) {
+        gameContent.innerHTML = `
+          <div class="theme-display">${currentTheme.name}</div>
+          <div class="material-question">${currentMaterial.name}</div>
+          <div class="material-answer" id="material-answer">${currentMaterial.description}</div>
+        `;
+
+        gameControls.innerHTML = `
+          <button class="game-btn primary-btn" onclick="showAnswer()">
+            <i class="fas fa-eye"></i> Показать ответ
+          </button>
+        `;
+      } else {
+        document.getElementById('material-answer').style.display = 'block';
+
+        gameControls.innerHTML = `
+          <button class="game-btn primary-btn" onclick="nextMaterial()">
+            <i class="fas fa-arrow-right"></i> Дальше
+          </button>
+        `;
+      }
+    }
+
+    function showAnswer() {
+      gameData.isAnswerShown = true;
+      showNextMaterial();
+    }
+
+    function nextMaterial() {
+      gameData.isAnswerShown = false;
+      gameData.currentMaterialIndex++;
+      updateProgress();
+      showNextMaterial();
+    }
+
+    function markAsDifficult() {
+      alert('Материал помечен как сложный. Вы можете вернуться к нему позже.');
+      nextMaterial();
+    }
+
+    function showResults() {
+      gameContent.innerHTML = `
+        <div class="result-screen">
+          <div class="result-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <h2>Проверка завершена!</h2>
+          <p>Вы повторили все материалы по выбранным темам.</p>
+        </div>
+      `;
+
+      gameControls.innerHTML = `
+        <button class="game-btn success-btn" onclick="window.location.reload()">
+          <i class="fas fa-redo"></i> Начать заново
+        </button>
+        <button class="game-btn primary-btn" onclick="window.location.href='{% url 'learn:info' themes.0.id %}'">
+          <i class="fas fa-home"></i> К списку тем
+        </button>
+      `;
+    }
+
+    function updateProgress() {
+      const totalMaterials = gameData.themes.reduce((sum, theme) => sum + theme.materials.length, 0);
+      const completed = gameData.themes.slice(0, gameData.currentThemeIndex)
+                         .reduce((sum, theme) => sum + theme.materials.length, 0) +
+                       gameData.currentMaterialIndex;
+
+      const progress = Math.round((completed / totalMaterials) * 100);
+      progressText.textContent = `${completed}/${totalMaterials}`;
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    window.showAnswer = showAnswer;
+    window.nextMaterial = nextMaterial;
+    window.markAsDifficult = markAsDifficult;
+  });
+</script>
+{% endblock %}
